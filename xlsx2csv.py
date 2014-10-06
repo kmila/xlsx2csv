@@ -37,6 +37,8 @@ except:
     # python2.4
     from optparse import OptionParser
 
+CSV_VERSION = ["0"]
+
 # see also ruby-roo lib at: http://github.com/hmcgowan/roo
 FORMATS = {
   'general' : 'float',
@@ -146,6 +148,9 @@ class Xlsx2csv:
         self.options = options
         try:
             self.ziphandle = zipfile.ZipFile(xlsxfile)
+            version_ts = os.stat(xlsxfile).st_ctime
+            global CSV_VERSION
+            CSV_VERSION = [ str(version_ts) ]
         except (zipfile.BadZipfile, IOError):
             if self.options['cmd']:
                 sys.stderr.write("Invalid xlsx file: " + xlsxfile + os.linesep)
@@ -543,7 +548,8 @@ class Sheet:
                         d+= (l - len(d)) * ['']
                 # write line to csv
                 if not self.skip_empty_lines or d.count('') != len(d):
-                    self.writer.writerow(d)
+                    # add version to last column
+                    self.writer.writerow(d + CSV_VERSION)
             self.in_row = False
         elif self.in_sheet and name == 'sheetData':
             self.in_sheet = False
