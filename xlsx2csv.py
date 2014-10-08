@@ -37,7 +37,8 @@ except:
     # python2.4
     from optparse import OptionParser
 
-CSV_VERSION = ["0"]
+CSV_VERSION = []
+CSV_VERSION_FMT = "%Y-%m-%dT%H:%M:%S"
 
 # see also ruby-roo lib at: http://github.com/hmcgowan/roo
 FORMATS = {
@@ -150,7 +151,8 @@ class Xlsx2csv:
             self.ziphandle = zipfile.ZipFile(xlsxfile)
             version_ts = os.stat(xlsxfile).st_ctime
             global CSV_VERSION
-            CSV_VERSION = [ str(version_ts) ]
+            global CSV_VERSION_FMT
+            CSV_VERSION = [ datetime.datetime.fromtimestamp(version_ts).strftime(CSV_VERSION_FMT) ]
         except (zipfile.BadZipfile, IOError):
             if self.options['cmd']:
                 sys.stderr.write("Invalid xlsx file: " + xlsxfile + os.linesep)
