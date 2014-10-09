@@ -38,7 +38,7 @@ except:
     from optparse import OptionParser
 
 CSV_VERSION = []
-CSV_VERSION_FMT = "%Y-%m-%dT%H:%M:%S"
+CSV_VERSION_FMT = "%Y-%m-%dT%H:%M:%SZ"
 
 # see also ruby-roo lib at: http://github.com/hmcgowan/roo
 FORMATS = {
@@ -550,8 +550,8 @@ class Sheet:
                         d+= (l - len(d)) * ['']
                 # write line to csv
                 if not self.skip_empty_lines or d.count('') != len(d):
-                    # add version to last column
-                    self.writer.writerow(d + CSV_VERSION)
+                    # add version to last column and convert to upper
+                    self.writer.writerow([element.upper() for element in d] + CSV_VERSION)
             self.in_row = False
         elif self.in_sheet and name == 'sheetData':
             self.in_sheet = False
