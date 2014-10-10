@@ -25,6 +25,7 @@ __version__ = "0.6"
 
 import csv, datetime, zipfile, string, sys, os, re
 import xml.parsers.expat
+from unicodedata import normalize
 from xml.dom import minidom
 try:
     # python2.4
@@ -551,7 +552,7 @@ class Sheet:
                 # write line to csv
                 if not self.skip_empty_lines or d.count('') != len(d):
                     # add version to last column and convert to upper
-                    self.writer.writerow([element.upper() for element in d] + CSV_VERSION)
+                    self.writer.writerow([normalize_upper(element) for element in d] + CSV_VERSION)
             self.in_row = False
         elif self.in_sheet and name == 'sheetData':
             self.in_sheet = False
@@ -584,6 +585,8 @@ class Sheet:
                   col = chr(t % 26 + 65) + col
                   t = (t / 26) - 1
       
+def normalize_upper(data):
+     return ''.join(x for x in normalize('NFKD', (data or '').decode('utf-8')) if x in string.printable).upper().encode('ASCII','ignore')
 
 def convert_recursive(path, sheetid, kwargs):
     kwargs['cmd'] = False
