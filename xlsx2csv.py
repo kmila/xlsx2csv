@@ -473,17 +473,12 @@ class Sheet:
                             if self.workbook.date1904:
                                 date = datetime.datetime(1904, 1, 1) + datetime.timedelta(float(self.data))
                             else:
-                                date = datetime.datetime(1899, 12, 30) + datetime.timedelta(float(self.data))                                
+                                date = datetime.datetime(1899, 12, 30) + datetime.timedelta(float(self.data))
                             if self.dateformat:
                                 # str(dateformat) - python2.5 bug, see: http://bugs.python.org/issue2782
-                                self.data = date.strftime(str(self.dateformat))                                
-                            else:                                
-                                dateformat = format.replace("yyyy", "%Y").replace("yy", "%y"). \
-                                  replace("hh:mm", "%H:%M").replace("h", "%H").replace("%H%H", "%H").replace("ss", "%S"). \
-                                  replace("d", "%d").replace("%e%e", "%d"). \
-                                  replace("mmmm", "%B").replace("mmm", "%b").replace(":mm", ":%M").replace("m", "%m").replace("%m%m", "%m"). \
-                                  replace("am/pm", "%p")
-                                self.data = date.strftime(str(dateformat)).strip()
+                                self.data = date.strftime(str(self.dateformat))
+                            else:
+                                self.data = date.strftime(str('%Y%m%d')).strip()
                         elif format_type == 'time': # time
                             self.data = str(float(self.data) * 24*60*60)
                         elif format_type == 'float' and ('E' in self.data or 'e' in self.data):
