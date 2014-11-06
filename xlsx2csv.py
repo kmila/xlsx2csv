@@ -40,6 +40,7 @@ except:
 
 CSV_VERSION = []
 CSV_VERSION_FMT = "%Y-%m-%dT%H:%M:%SZ"
+PHONE_COL = 10
 
 # see also ruby-roo lib at: http://github.com/hmcgowan/roo
 FORMATS = {
@@ -472,14 +473,14 @@ class Sheet:
                             if self.workbook.date1904:
                                 date = datetime.datetime(1904, 1, 1) + datetime.timedelta(float(self.data))
                             else:
-                                date = datetime.datetime(1899, 12, 30) + datetime.timedelta(float(self.data))
+                                date = datetime.datetime(1899, 12, 30) + datetime.timedelta(float(self.data))                                
                             if self.dateformat:
                                 # str(dateformat) - python2.5 bug, see: http://bugs.python.org/issue2782
-                                self.data = date.strftime(str(self.dateformat))
-                            else:
+                                self.data = date.strftime(str(self.dateformat))                                
+                            else:                                
                                 dateformat = format.replace("yyyy", "%Y").replace("yy", "%y"). \
                                   replace("hh:mm", "%H:%M").replace("h", "%H").replace("%H%H", "%H").replace("ss", "%S"). \
-                                  replace("d", "%e").replace("%e%e", "%d"). \
+                                  replace("d", "%d").replace("%e%e", "%d"). \
                                   replace("mmmm", "%B").replace("mmm", "%b").replace(":mm", ":%M").replace("m", "%m").replace("%m%m", "%m"). \
                                   replace("am/pm", "%p")
                                 self.data = date.strftime(str(dateformat)).strip()
@@ -552,7 +553,14 @@ class Sheet:
                 # write line to csv
                 if not self.skip_empty_lines or d.count('') != len(d):
                     # add version to last column and convert to upper
-                    self.writer.writerow([normalize_upper(element) for element in d] + CSV_VERSION)
+                    for idx, element in enumerate(d): 
+                        if (idx == PHONE_COL):
+                            phone = re.sub("[^0-9]", "", str(d[idx]))
+                            if len(phone) > 2:
+                                d[idx] = phone[:2] + '-' + phone[2:]
+                        else:
+                            d[idx] = normalize_upper(element)
+                    self.writer.writerow(d + CSV_VERSION)
             self.in_row = False
         elif self.in_sheet and name == 'sheetData':
             self.in_sheet = False
