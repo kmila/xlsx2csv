@@ -2,22 +2,22 @@
 #
 #   Copyright information
 #
-#	Copyright (C) 2010-2012 Dilshod Temirkhodjaev <tdilshod@gmail.com>
+#   Copyright (C) 2010-2012 Dilshod Temirkhodjaev <tdilshod@gmail.com>
 #
 #   License
 #
-#	This program is free software; you can redistribute it and/or modify
-#	it under the terms of the GNU General Public License as published by
-#	the Free Software Foundation; either version 2 of the License, or
-#	(at your option) any later version.
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
 #
-#	This program is distributed in the hope that it will be useful,
-#	but WITHOUT ANY WARRANTY; without even the implied warranty of
-#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#	GNU General Public License for more details.
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#   GNU General Public License for more details.
 #
-#	You should have received a copy of the GNU General Public License
-#	along with this program. If not, see <http://www.gnu.org/licenses/>.
+#   You should have received a copy of the GNU General Public License
+#   along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 __author__ = "Dilshod Temirkhodjaev <tdilshod@gmail.com>"
 __license__ = "GPL-2+"
@@ -40,7 +40,11 @@ except:
 
 CSV_VERSION = []
 CSV_VERSION_FMT = "%Y-%m-%dT%H:%M:%SZ"
-PHONE_COL = 10
+
+ID_COL = -1
+PHONE_COL = -1
+ID_PREFIX = ""
+NORMALIZE = False
 
 # see also ruby-roo lib at: http://github.com/hmcgowan/roo
 FORMATS = {
@@ -547,15 +551,22 @@ class Sheet:
                         d+= (l - len(d)) * ['']
                 # write line to csv
                 if not self.skip_empty_lines or d.count('') != len(d):
-                    # add version to last column and convert to upper
-                    for idx, element in enumerate(d): 
-                        if (idx == PHONE_COL):
-                            phone = re.sub("[^0-9]", "", str(d[idx]))
-                            if len(phone) > 2:
-                                d[idx] = phone[:2] + '-' + phone[2:]
-                        else:
-                            d[idx] = normalize_upper(element)
-                    self.writer.writerow(d + CSV_VERSION)
+                    if (str(self.rowNum) == '1'):
+                        # add version to last column and convert to upper
+                        self.writer.writerow([normalize_upper(element) for element in d] + CSV_VERSION)
+                    else:
+                        # BEGIN custom column formatting
+                        for idx, element in enumerate(d):
+                            if (PHONE_COL >= 0 and idx == PHONE_COL):
+                                phone = re.sub("[^0-9]", "", str(d[idx]))
+                                if len(phone) > 2:
+                                    d[idx] = phone[:2] + '-' + phone[2:]
+                            elif (ID_COL >= 0 and idx == ID_COL):
+                                d[idx] = ID_PREFIX + str(d[idx])
+                            elif (NORMALIZE):
+                                d[idx] = normalize_upper(element)
+                        # END custom column formatting
+                        self.writer.writerow(d + CSV_VERSION)
             self.in_row = False
         elif self.in_sheet and name == 'sheetData':
             self.in_sheet = False
